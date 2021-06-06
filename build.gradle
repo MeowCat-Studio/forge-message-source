@@ -1,29 +1,62 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.+', changing: true
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.30"
     }
 }
+plugins {
+    id("com.github.johnrengelman.shadow") version "5.2.0"
+}
+
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'kotlin'
 
-version = '0.0.1'
-group = 'example.examplemod'
-archivesBaseName = 'examplemod'
+version = '1.0.0'
+group = 'org.meowcat.mesagisto'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+repositories {
+    maven {
+        name = 'Kotlin for Forge'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+    }
+    maven{ url = "https://jitpack.io" }
+}
 
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
+    fg.deobf(implementation('thedarkcolour:kotlinforforge:1.11.0'))
+
+    implementation("io.nats:jnats:2.10.0")
+
+    implementation("com.fasterxml.jackson.core:jackson-core:2.12.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.1")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
 minecraft {
-    mappings channel: 'snapshot', version: '20201028-1.16.3'
-    // Add your AccessTransformer
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
+    mappings channel: 'official', version: '1.16.5'
     runs {
+        client {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
 
         server {
             workingDirectory project.file('run')
@@ -50,50 +83,5 @@ minecraft {
                 }
             }
         }
-    }
-}
-
-repositories {
-    maven {
-        name = 'Kotlin for Forge'
-        url = 'https://thedarkcolour.github.io/KotlinForForge/'
-    }
-    maven{ url = "https://jitpack.io" }
-}
-
-dependencies {
-    // Use the latest version of Minecraft Forge
-    minecraft 'net.minecraftforge:forge:1.16.5-36.0.10'
-
-    // Use the latest version of KotlinForForge
-    fg.deobf(implementation('thedarkcolour:kotlinforforge:1.9.0'))
-
-    implementation 'org.meowcat:message-forwarding-client:0.1.1'
-}
-
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = '1.8'
-        languageVersion = '1.4'
-        apiVersion = '1.4'
-    }
-}
-
-// Include assets and data from data generators
-sourceSets.main.resources {
-    srcDirs 'src/generated/resources/'
-}
-
-jar {
-    manifest {
-        attributes([
-                "Specification-Title": "message-forwarding",
-                "Specification-Vendor": "examplemodsareus",
-                "Specification-Version": "1", // We are version 1 of ourselves
-                "Implementation-Title": project.name,
-                "Implementation-Version": getArchiveVersion(),
-                "Implementation-Vendor" :"examplemodsareus",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
     }
 }
