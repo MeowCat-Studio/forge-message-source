@@ -1,5 +1,6 @@
 package org.meowcat.mesagisto.forge
 
-val players
-   get() = run {
+inline val players
+   inline get() = run {
+      MesagistoMod.server.playerList
    }
